@@ -39,7 +39,7 @@
 import axios from "axios";
 import ProgressBar from "vuejs-progress-bar";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { addDoc, collection, getFirestore } from "firebase/firestore"; 
+import { addDoc, setDoc, doc, arrayUnion, collection, getFirestore } from "firebase/firestore"; 
 
 export default {
   name: "PostAdd",
@@ -139,7 +139,14 @@ export default {
                 description: this.description,
                 location: this.description,
                 tags: this.tags,
+                nb_likes: 0,
+                nb_comments: 0,
+                nb_views: 0,
               });
+
+              setDoc(doc(getFirestore(), "postLikes", this.auth.uid), {
+                  user_id: arrayUnion(0),
+              })
 
             })
             .catch(error => {

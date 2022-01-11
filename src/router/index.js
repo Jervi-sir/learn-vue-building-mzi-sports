@@ -32,9 +32,6 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
-    meta: {
-      requiresAuth: true
-    }
   },
   {
     path: '/logout',
@@ -63,13 +60,13 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const guest = to.matched.some(record => record.meta.guest);
-  if (requiresAuth && !getAuth().currentUser) {
+  if (requiresAuth && !getAuth()) {
     next('login');
   } else {
     next();
   }
 
-  if (guest && getAuth().currentUser) {
+  if (guest && getAuth()) {
     next('/');
   } else {
     next();
