@@ -69,6 +69,7 @@ export default {
       tags: '',
       location: '',
       type: '',
+      created_at: Date.now(),
     };
   },
   methods: {

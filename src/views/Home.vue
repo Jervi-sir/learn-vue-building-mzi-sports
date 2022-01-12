@@ -1,8 +1,6 @@
 <template>
   <div class="home">
     <Menu></Menu>
-    {{auth}}
-
     <div class="post-container">
       <div class="post" v-for="(post, index) in posts" :key="index">
         <div class="profile">
@@ -22,7 +20,7 @@
           <button v-if="!post.liked" class="heart" @click="like(post.post_id, index)">
             <img src="images/heart_empty.svg" alt="">
           </button>
-          <span class="created-at">hours ago</span>
+          <span class="created-at">{{ post.created_at }}</span>
         </div>
       </div>
     </div>
@@ -31,10 +29,9 @@
 
 <script>
 // @ is an alias to /src
-import { collection, getDocs, getFirestore, updateDoc, doc, arrayUnion, arrayRemove } from "firebase/firestore"; 
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { collection, getDocs, getDoc, getFirestore, updateDoc, doc, arrayUnion, arrayRemove } from "firebase/firestore"; 
 import Menu from '../views/Menu.vue'
-import getAuthLikes from '../helpers/auth.js'
+import timeDifference from '../helpers/tools'
 
 export default {
   name: 'Home',
@@ -55,10 +52,6 @@ export default {
       updateDoc(doc(getFirestore(), "userLikes", this.auth), {
           post_id: arrayUnion(uid),
       }).then(() => {
-        updateDoc(doc(getFirestore(), "postLikes", uid), {
-          user_id: arrayUnion(this.auth),
-        })
-      }).then(() => {
         this.posts[index].nb_likes++;
       });
     },
@@ -67,10 +60,6 @@ export default {
       updateDoc(doc(getFirestore(), "userLikes", this.auth), {
           post_id: arrayRemove(uid),
       }).then(() => {
-        updateDoc(doc(getFirestore(), "postLikes", uid), {
-          user_id: arrayRemove(this.auth),
-        })
-      }).then(() => {
         this.posts[index].nb_likes--;
       });
     },
@@ -78,23 +67,23 @@ export default {
   },
 
   created() {  
-    const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        this.auth = user.uid;
-      } else {
-        // ...
-      }
-    });
+    this.auth = localStorage.getItem('user_id');
   },
 
   async mounted() {
     const db = getFirestore();
-    
-    const querySnapshot =await getDocs(collection(db, "posts"));
 
+    const userLikesDoc = await getDoc(doc(db, "userLikes", this.auth));
+    const userLikes = userLikesDoc.data().post_id;
+    const querySnapshot =await getDocs(collection(db, "posts"));
     querySnapshot.forEach((doc) => {
       var post = doc.data();
+      const userRef = doc(db, 'users', post.user_id);
+
+      getDoc(userRef).then((res) => {
+        console.log(res.data(), res.id);
+      })
+
       this.posts.push({
         post_id: doc.id,
         user_id: post.user_id,
@@ -107,12 +96,12 @@ export default {
         nb_likes: post.nb_likes,
         nb_comments: post.nb_comments,
         nb_views: post.nb_views,
-        liked: this.userLikes.includes(doc.id) ? true : false,
+        liked: userLikes.includes(doc.id) ? true : false,
+        created_at: timeDifference(post.created_at) 
       });
-      console.log(`${doc.id} => ${doc.data().user_id}`);
+      //console.log(`${doc.id} => ${doc.data().user_id}`);
     });
 
-    console.log(getAuthLikes(this.auth));
   },
   
 

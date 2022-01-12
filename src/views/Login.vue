@@ -1,5 +1,6 @@
 <template>
     <div class="body">
+        <Menu></Menu>
         <div class="form">
             <div class="logo">
                 <img src="images/logs_logo.svg" alt="mzi sports">
@@ -80,10 +81,14 @@ footer {
 
 <script>
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import Menu from '../views/Menu.vue'
 
 export default {
   
     name: 'Login',
+    components: {
+        Menu,
+    },
     data () {
         return {
             email: '',
@@ -94,7 +99,8 @@ export default {
         register () { 
             const auth = getAuth();
             signInWithEmailAndPassword(auth, this.email, this.password)
-                .then(() => {
+                .then((cred) => {
+                    window.localStorage.setItem('user_id', cred.user.uid);
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -104,7 +110,7 @@ export default {
         },
     },
     mounted() {
-        console.log(getAuth());
+        console.log(getAuth().currentUser);
     },
     
 }

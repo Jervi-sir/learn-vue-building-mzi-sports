@@ -1,5 +1,6 @@
 <template>
     <div class="body">
+        <Menu></Menu>
         <div class="form">
             <div class="logo">
                 <img src="images/logs_logo.svg" alt="mzi sports">
@@ -78,9 +79,13 @@ footer {
 <script>
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { setDoc, doc, getFirestore, arrayUnion } from "firebase/firestore"; 
+import Menu from '../views/Menu.vue'
 
 export default {
     name: 'Register',
+    components: {
+        Menu,
+    }, 
     data () {
         return {
             email: '',
@@ -98,6 +103,7 @@ export default {
                     setDoc(doc(getFirestore(), "userLikes", cred.user.uid), {
                         post_id: arrayUnion(0),
                     })
+                    window.localStorage.setItem('user_id', cred.user.uid);
                 })
                 .catch((error) => {
                     const errorCode = error.code;

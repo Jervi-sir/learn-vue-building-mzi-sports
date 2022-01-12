@@ -19,7 +19,7 @@ export default {
         const auth = getAuth();
         signOut(auth).then(() => {
           console.log('loggedout');
-          console.log(getAuth());
+          console.log(getAuth().currentUser);
           // Sign-out successful.
         }).catch((error) => {
           console.log(error);
